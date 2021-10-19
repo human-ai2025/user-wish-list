@@ -2,3 +2,5 @@ flask
 redis
 Flask-SQLAlchemy
 psycopg2-binary
+flask-caching
+requests

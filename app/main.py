@@ -1,7 +1,14 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import redis
+import requests
+from flask_caching import Cache  # Import Cache from flask_caching module
+from flask import Response
+import json
 
 app = Flask(__name__)
+
+app.config.from_object('config.Config')  # Set the configuration variables to the flask application
+cache = Cache(app)  # Initialize Cache
 
 # postgresql://username:password@host:port/database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://hello_flask:hello_flask@db:5432/hello_flask_dev'
@@ -98,3 +105,29 @@ def get():
                                food=record.food)
     return render_template('index.html', get=1, msg="(From Redis)", username=username,
                            place=user_data[b'place'].decode('utf-8'), food=user_data[b'food'].decode('utf-8'))
+
+
+
+@app.route("/universities")
+@cache.cached(timeout=300, query_string=True)
+def get_universities():
+    API_URL = "http://universities.hipolabs.com/search?country="
+    search = request.args.get('country')
+    r = requests.get(f"{API_URL}{search}")
+    return jsonify(r.json())
+
+
+
+# todo make a acknowledgement.
+# todo update redis cache after that.
+# todo db update happens -> acknowledgement comes -> clear that key/cache(find out) -> Update cache key
+# todo cache the db with cached and then try updatig the cache
+
+
+@app.route("/get_keys")
+def get_keys():
+    keys_r = {}
+    for i, key in enumerate(red.scan_iter()):
+        keys_r[i] = key
+    json_object = json.dumps(keys_r, indent=4)
+    return jsonify(json_object)

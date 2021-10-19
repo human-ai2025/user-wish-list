@@ -4,6 +4,8 @@ services:
     build: ./
     environment:
       - PYTHONBUFFERED=1
+    env_file:
+      - .env
     ports:
       - "80:80"
     links:
