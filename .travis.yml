@@ -1,0 +1,25 @@
+language: generic 
+
+services:
+  - docker
+
+after_success:
+  - docker build -t user_name/github_repo .
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+
+  - docker push user_name/github_repo
+
+deploy:
+  provider: elasticbeanstalk
+  region: ap-south-1
+  app: app-name
+  env: app-name
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket_name: "the_s3_bucket_name"
+  bucket_path: "docker"
+  on:
+    branch: main
+    
+
