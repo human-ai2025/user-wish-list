@@ -108,8 +108,8 @@ def get():
 
 
 
-@app.route("/universities")
-@cache.cached(timeout=300, query_string=True)
+@app.route("/universities/")
+@cache.cached(query_string=True)
 def get_universities():
     API_URL = "http://universities.hipolabs.com/search?country="
     search = request.args.get('country')
@@ -120,7 +120,7 @@ def get_universities():
 
 # todo make a acknowledgement.
 # todo update redis cache after that.
-# todo db update happens -> acknowledgement comes -> clear that key/cache(find out) -> Update cache key
+# todo db update happens -> acknowledgement comes -> clear that key -> Update cache key
 # todo cache the db with cached and then try updatig the cache
 
 
@@ -128,6 +128,9 @@ def get_universities():
 def get_keys():
     keys_r = {}
     for i, key in enumerate(red.scan_iter()):
-        keys_r[i] = key
+        keys_r[i] = key.decode('utf-8')
+    print("*"*50)
+    print(keys_r)
+    print("*" * 50)
     json_object = json.dumps(keys_r, indent=4)
-    return jsonify(json_object)
+    return json_object
